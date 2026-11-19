@@ -11,6 +11,7 @@ import com.jestron.afkalan.zone.AfkZone;
 import com.jestron.afkalan.zone.ZoneManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -18,6 +19,7 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -443,17 +445,27 @@ public final class AfkCommand implements CommandExecutor, TabCompleter {
         Player online = Bukkit.getPlayerExact(args[2]);
         UUID uuid;
         String name;
+        String nameForFile = null;
         if (online != null) {
             uuid = online.getUniqueId();
             name = online.getName();
+            nameForFile = name;
         } else {
             uuid = plugin.balances().findByName(args[2]);
-            if (uuid == null) {
-                s().send(sender, "oyuncu-bulunamadi", "{oyuncu}", args[2]);
-                return;
+            if (uuid != null) {
+                String known = plugin.balances().name(uuid);
+                name = known == null ? args[2] : known;
+            } else {
+                // Sunucuya daha önce girmiş ama henüz AFK parası olmayan oyuncu (ağ isteği yapılmaz)
+                OfflinePlayer op = cachedOffline(args[2]);
+                if (op == null) {
+                    s().send(sender, "oyuncu-bulunamadi", "{oyuncu}", args[2]);
+                    return;
+                }
+                uuid = op.getUniqueId();
+                name = op.getName() == null ? args[2] : op.getName();
+                nameForFile = name;
             }
-            String known = plugin.balances().name(uuid);
-            name = known == null ? args[2] : known;
         }
         BalanceManager bm = plugin.balances();
         if (sub.equals("bak")) {
@@ -469,7 +481,6 @@ public final class AfkCommand implements CommandExecutor, TabCompleter {
             s().send(sender, "gecersiz-sayi", "{deger}", args[3]);
             return;
         }
-        String nameForFile = online != null ? online.getName() : null;
         boolean notify = online != null && online != sender;
         switch (sub) {
             case "ver": {
@@ -511,6 +522,29 @@ public final class AfkCommand implements CommandExecutor, TabCompleter {
     }
 
     // ---------------------------------------------------------------- yardımcılar
+
+    private static final Method OFFLINE_IF_CACHED = resolveOfflineIfCached();
+
+    private static Method resolveOfflineIfCached() {
+        try {
+            return Bukkit.getServer().getClass().getMethod("getOfflinePlayerIfCached", String.class);
+        } catch (Throwable t) {
+            return null; // Spigot: yok
+        }
+    }
+
+    /** Paper'ın kullanıcı önbelleğinden oyuncu; Mojang'a istek atmaz, sunucuyu dondurmaz. */
+    private static OfflinePlayer cachedOffline(String name) {
+        if (OFFLINE_IF_CACHED == null) return null;
+        try {
+            Object o = OFFLINE_IF_CACHED.invoke(Bukkit.getServer(), name);
+            if (!(o instanceof OfflinePlayer)) return null;
+            OfflinePlayer op = (OfflinePlayer) o;
+            return op.hasPlayedBefore() || op.isOnline() ? op : null;
+        } catch (Throwable t) {
+            return null;
+        }
+    }
 
     private Double positive(CommandSender sender, String raw) {
         Double d = Num.parse(raw);

@@ -121,5 +121,8 @@ mvn clean package   # JDK 17+ ; çıktı: target/AfkAlan-<sürüm>.jar (Java 8 b
 
 WorldEdit için derleme bağımlılığı yoktur (çalışma anında bağlanır), bu yüzden IDE'de WorldEdit hatası çıkmaz.
 
+> Not: Scoreboard'u paketlerle çizen eklentiler (ör. TAB) kullanıyorsan çakışmayı önlemek için
+> `config.yml` içinde `scoreboard.aktif: false` yapabilir, satırları o eklentide `%afk_...%` ile gösterebilirsin.
+
 > Not: Sunucuda EssentialsX varsa onun `/afk` komutuyla çakışmaması için AfkAlan Essentials'tan önce yüklenir.
 > Essentials'ın AFK komutu `/away` olarak kullanılmaya devam eder.

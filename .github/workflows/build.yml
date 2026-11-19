@@ -52,7 +52,7 @@ jobs:
           - { mc: '1.20.6', java: '21', we: '7.3.' }
           - { mc: '1.21.1', java: '21', we: '7.3.' }
           - { mc: '1.21.4', java: '21', we: '7.3.' }
-          - { mc: '1.21-latest', java: '21', we: '' }
+          - { mc: '1.21-latest', java: '25', we: '' }
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
