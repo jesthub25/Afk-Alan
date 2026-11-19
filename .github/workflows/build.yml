@@ -1,0 +1,91 @@
+name: Derleme ve Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Derleme
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+      - name: mvn package
+        run: mvn -B -ntp clean package
+      - name: Bytecode sürümü kontrolü (Java 8 = 52)
+        run: |
+          cd target && mkdir -p chk && cd chk && unzip -q -o ../AfkAlan-*.jar com/jestron/afkalan/AfkAlan.class
+          v=$(od -An -j7 -N1 -tu1 com/jestron/afkalan/AfkAlan.class | tr -d ' ')
+          echo "class major version: $v"; test "$v" = "52"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AfkAlan-jar
+          path: target/AfkAlan-*.jar
+          if-no-files-found: error
+
+  test:
+    name: Paper ${{ matrix.mc }}
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { mc: '1.16.5', java: '11' }
+          - { mc: '1.17.1', java: '17' }
+          - { mc: '1.18.2', java: '17' }
+          - { mc: '1.19.4', java: '17' }
+          - { mc: '1.20.4', java: '17' }
+          - { mc: '1.20.6', java: '21' }
+          - { mc: '1.21.1', java: '21' }
+          - { mc: '1.21.4', java: '21' }
+          - { mc: '1.21-latest', java: '21' }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.java }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: AfkAlan-jar
+          path: dist
+      - name: Sunucu testi
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash .github/scripts/smoke-test.sh "${{ matrix.mc }}" "$(ls dist/AfkAlan-*.jar | head -n1)"
+      - name: Sunucu günlüğü
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: server-log-${{ matrix.mc }}
+          path: ${{ runner.temp }}/smoke-*/server.log
+          if-no-files-found: ignore
+
+  publish:
+    name: Release'e jar ekle
+    if: github.event_name == 'release'
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: AfkAlan-jar
+          path: dist
+      - name: Yükle
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "${{ github.event.release.tag_name }}" dist/AfkAlan-*.jar --clobber --repo "${{ github.repository }}"

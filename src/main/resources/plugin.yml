@@ -1,0 +1,51 @@
+name: AfkAlan
+version: '${project.version}'
+main: com.jestron.afkalan.AfkAlan
+api-version: '1.16'
+author: Jestron
+description: AFK alanı, sanal AFK parası ve AFK market eklentisi
+website: https://github.com/jesthub25/Afk-Alan
+
+softdepend:
+  - PlaceholderAPI
+  - WorldEdit
+  - FastAsyncWorldEdit
+  - Multiverse-Core
+
+# /afk komutunun Essentials'ın /afk komutundan önce kaydedilmesi için.
+loadbefore:
+  - Essentials
+
+commands:
+  afk:
+    description: AFK alanı, AFK market ve AFK bakiye komutları
+    usage: /afk yardim
+    aliases: [afkalan]
+
+permissions:
+  afk.use:
+    description: /afk bakiye, /afk market, /afk top
+    default: true
+  afk.vipafk:
+    description: AFK alanlarında vip-odul miktarını alır
+    default: false
+  afk.admin:
+    description: Tüm AfkAlan yönetici yetkileri
+    default: op
+    children:
+      afk.admin.alan: true
+      afk.admin.market: true
+      afk.admin.para: true
+      afk.admin.reload: true
+  afk.admin.alan:
+    description: AFK alanı oluşturma, silme, ayarlama
+    default: op
+  afk.admin.market:
+    description: AFK markete ürün ekleme, silme, fiyat değiştirme
+    default: op
+  afk.admin.para:
+    description: Oyunculara AFK parası verme, alma, ayarlama
+    default: op
+  afk.admin.reload:
+    description: /afk reload
+    default: op

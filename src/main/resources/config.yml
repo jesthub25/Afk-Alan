@@ -1,0 +1,140 @@
+# ==========================================================
+#  AfkAlan - by Jestron
+#  Renkler: &a, &l ... ve hex: &#FFAA00 (1.16+)
+#  Bu dosyayı düzenledikten sonra oyunda: /afk reload
+# ==========================================================
+
+# Sanal paranın görünen adı
+para-birimi: "AFK Parası"
+
+# Yeni oluşturulan alanların varsayılan ayarları (alanlar.yml içinden her alan ayrı değiştirilebilir)
+varsayilan-alan:
+  cooldown: 60          # saniye
+  odul: 1.0             # normal oyuncu ödülü
+  vip-odul: 2.0         # vip-yetki sahibine verilen ödül
+  vip-yetki: "afk.vipafk"
+
+# Bu oyun modundaki oyuncular alanda sayılmaz (ödül almaz)
+sayilmayan-oyun-modlari:
+  - SPECTATOR
+
+# Alan içindeki geri sayım
+sayac:
+  # TITLE = ekranın tam ortası, ACTIONBAR = hotbar üstü, IKISI = ikisi birden, KAPALI
+  gosterim: TITLE
+  title: "{renk}&l{kalan}"
+  subtitle: "&7{alan} &8» &födüle kalan süre"
+  actionbar: "&8[&6AFK&8] &7{alan} &8» {renk}{kalan}s {bar}"
+  title-sure-tick: 30
+  renk-yuksek: "&a"     # sürenin %50'sinden fazlası kaldıysa
+  renk-orta: "&e"       # %20 - %50
+  renk-dusuk: "&c"      # %20'den az
+  bar-uzunluk: 20
+  bar-dolu: "&a|"
+  bar-bos: "&7|"
+
+# Ses anahtarları (minecraft:entity.experience_orb.pickup gibi). Boş bırakılırsa ses çalmaz.
+sesler:
+  odul: "entity.experience_orb.pickup"
+  satin-alma: "entity.player.levelup"
+  basarisiz: "entity.villager.no"
+
+# Sadece AFK alanının içindeyken gösterilen scoreboard.
+# Alandan çıkınca oyuncunun önceki scoreboard'u geri verilir.
+# En fazla 15 satır, her satır renk kodları dahil en fazla 64 karakter.
+# Değişkenler: {bakiye} {para} {alan} {kalan} {cooldown} {odul} {oyuncu}
+# PlaceholderAPI kuruluysa %placeholder% da kullanılabilir.
+scoreboard:
+  aktif: true
+  baslik: "&6&lAFK PANEL"
+  # Paper 1.20.3+ sunucularda sağdaki kırmızı sayıları gizler
+  sayilari-gizle: true
+  satirlar:
+    - "&7&m------------------"
+    - "&eBakiye: &f{bakiye}"
+    - "&7{para}"
+    - " "
+    - "&eAlan: &f{alan}"
+    - "&eKalan: &c{kalan}s"
+    - "&eÖdül: &a+{odul}"
+    - "&7&m------------------ "
+    - "&7AvenorCraft"
+
+market:
+  baslik: "&8&lAFK Market"
+  # Ürün açıklamasının altına eklenen satırlar
+  # Değişkenler: {fiyat} {bakiye} {para} {durum} {slot}
+  lore:
+    - ""
+    - "&7Fiyat: &e{fiyat} {para}"
+    - "&7Bakiyen: &f{bakiye} {para}"
+    - ""
+    - "{durum}"
+  durum-yeterli: "&a» Satın almak için tıkla"
+  durum-yetersiz: "&c» Yetersiz bakiye"
+  # Sadece afk.admin.market yetkisi olanlara görünür
+  admin-lore: "&8Slot: #{slot}  (/afk market sil {slot})"
+  # Art arda tıklama koruması (milisaniye)
+  satin-alma-bekleme-ms: 250
+
+# Bakiyeler bu aralıkla arka planda (sunucuyu dondurmadan) kaydedilir. Kapanışta her zaman kaydedilir.
+otomatik-kayit-dakika: 5
+
+# PlaceholderAPI / scoreboard için alan dışında gösterilecek metin
+yok-metni: "Yok"
+evet-metni: "Evet"
+hayir-metni: "Hayır"
+
+mesajlar:
+  prefix: "&8[&6AFK&8] &r"
+  yetki-yok: "{prefix}&cBu komutu kullanma yetkin yok."
+  sadece-oyuncu: "{prefix}&cBu komut sadece oyun içinden kullanılabilir."
+  kullanim: "{prefix}&eKullanım: &f{kullanim}"
+  oyuncu-bulunamadi: "{prefix}&c'{oyuncu}' adlı oyuncu bulunamadı."
+  gecersiz-sayi: "{prefix}&c'{deger}' geçerli bir sayı değil."
+  gecersiz-miktar: "{prefix}&cMiktar 0'dan büyük olmalı."
+  reload-tamam: "{prefix}&aAfkAlan yeniden yüklendi."
+  reload-hata: "{prefix}&cYüklenemeyen dosya: &f{hata} &7(eski veriler korundu)"
+  dosya-hatasi: "{prefix}&c{dosya} hatalı, işlem iptal edildi: &f{hata}"
+
+  odul-verildi: "{prefix}&aAFK ödülünüz verildi! &7(+{miktar}) &eSanal Bakiyeniz: &6{bakiye} {para}"
+
+  alan-olusturuldu: "{prefix}&a'{alan}' AFK alanı oluşturuldu. &7({boyut} blok, cooldown {cooldown}s, ödül {odul}, vip {vip})"
+  alan-zaten-var: "{prefix}&c'{alan}' adında bir alan zaten var."
+  alan-isim-gecersiz: "{prefix}&cAlan adı 1-32 karakter olmalı; sadece harf, rakam, _ ve - kullanılabilir."
+  alan-silindi: "{prefix}&c'{alan}' AFK alanı silindi."
+  alan-yok: "{prefix}&c'{alan}' adında bir AFK alanı yok."
+  pos-secilmedi: "{prefix}&cÖnce WorldEdit/FAWE asası ile &epos1 &cve &epos2 &cseçmelisin! &7(//wand)"
+  worldedit-yok: "{prefix}&cSunucuda WorldEdit veya FastAsyncWorldEdit bulunamadı."
+  alan-ayarlandi: "{prefix}&a'{alan}' alanının &e{ayar} &adeğeri &e{deger} &aolarak ayarlandı."
+  alan-ayar-gecersiz: "{prefix}&cGeçersiz ayar. Kullanılabilir: &fcooldown, odul, vip-odul"
+  alan-liste-baslik: "{prefix}&6AFK Alanları &7({sayi})"
+  alan-liste-satir: "&8 • &e{alan} &7{dunya} &8[{pos1} → {pos2}] &7cd:&f{cooldown}s &7ödül:&f{odul} &7vip:&f{vip}"
+  alan-liste-bos: "{prefix}&7Henüz AFK alanı yok."
+
+  bakiye: "{prefix}&eAFK Para Bakiyeniz: &6{bakiye} {para}"
+
+  market-eklendi: "{prefix}&aElindeki item markete eklendi. &7Slot: &e#{slot} &7Fiyat: &e{fiyat} {para}"
+  market-dolu: "{prefix}&cMarket dolu! (en fazla 21 ürün)"
+  market-slot-dolu: "{prefix}&c#{slot} numaralı slot dolu."
+  market-elde-item-yok: "{prefix}&cEklemek istediğin itemi eline almalısın."
+  market-silindi: "{prefix}&c#{slot} numaralı slottaki ürün marketten silindi."
+  market-slot-bos: "{prefix}&c#{slot} numaralı slot boş."
+  gecersiz-slot: "{prefix}&cSlot 1 ile 21 arasında olmalı."
+  market-fiyat: "{prefix}&a#{slot} numaralı ürünün fiyatı &e{fiyat} {para} &aolarak güncellendi."
+  market-satin-alindi: "{prefix}&a{adet}x {item} &asatın alındı! &7(-{fiyat}) &eKalan Bakiye: &6{bakiye} {para}"
+  market-yetersiz: "{prefix}&cYetersiz bakiye! &7Gerekli: &e{fiyat} &7Bakiyen: &e{bakiye} {para}"
+  market-envanter-dolu: "{prefix}&cEnvanterinde yeterli yer yok."
+  market-guncellendi: "{prefix}&eMarket güncellendi, tekrar dene."
+
+  para-verildi: "{prefix}&a{oyuncu} adlı oyuncuya &e{miktar} {para} &averildi. &7Yeni bakiye: &f{bakiye}"
+  para-alindi: "{prefix}&a{oyuncu} adlı oyuncudan &e{miktar} {para} &aalındı. &7Yeni bakiye: &f{bakiye}"
+  para-ayarlandi: "{prefix}&a{oyuncu} adlı oyuncunun bakiyesi &e{bakiye} {para} &aolarak ayarlandı."
+  para-bak: "{prefix}&e{oyuncu} &7adlı oyuncunun bakiyesi: &6{bakiye} {para}"
+  para-sana-verildi: "{prefix}&aHesabına &e{miktar} {para} &aeklendi. &eBakiye: &6{bakiye} {para}"
+  para-senden-alindi: "{prefix}&cHesabından &e{miktar} {para} &cdüşüldü. &eBakiye: &6{bakiye} {para}"
+  para-senin-ayarlandi: "{prefix}&eBakiyen &6{bakiye} {para} &eolarak ayarlandı."
+
+  top-baslik: "{prefix}&6En Zengin AFK Oyuncuları"
+  top-satir: "&e{sira}. &f{oyuncu} &8- &6{bakiye} {para}"
+  top-bos: "{prefix}&7Henüz kimsenin bakiyesi yok."
